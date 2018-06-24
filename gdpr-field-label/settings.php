@@ -31,6 +31,7 @@ function gdpr_field_label_settings()
     register_setting('gdpr_field_settings', 're-email');
     register_setting('gdpr_field_settings', 'phone');
     register_setting('gdpr_field_settings', 'options');
+    register_setting('gdpr_field_settings', 'gdpr_policy');
     add_settings_section('gdpr-field-section', 'GDPR settings', 'gdpr_callback', 'gdpr-fields-settings');
     add_settings_field('color', 'Change balloon colors', 'update_color' , 'gdpr-fields-settings', 'gdpr-field-section');
     add_settings_field('name_context', 'Change balloon name context ', 'update_name' , 'gdpr-fields-settings', 'gdpr-field-section');
@@ -42,6 +43,7 @@ function gdpr_field_label_settings()
 
     add_settings_section('gdpr-policy-section', 'GDPR Policy Settings', 'gdpr_callback', 'gdpr-fields-settings');
     add_settings_field('select-page', 'Set privacy policy page', 'update_policy_page' , 'gdpr-fields-settings', 'gdpr-policy-section');
+    add_settings_field('select-page1', 'Set terms & conditions page', 'update_policy_page1' , 'gdpr-fields-settings', 'gdpr-policy-section');
 
 }
 function gdpr_callback()
@@ -149,6 +151,28 @@ function update_policy_page()
 </select>
 <?php }
 
+function update_policy_page1()
+{ $test = get_option('gdpr_policy'); ?>
+    <select name="gdpr_policy" value="<?php echo $test ?>">
+ <option name="" value=""><?php echo esc_attr( __( 'Select page' ) ); ?></option>
+    <?php $pages = get_pages();
+        foreach ( $pages as $page ) {
+            if(get_the_title($page->ID) == get_option('gdpr_policy')){
+                $select = 'selected="selected"';
+                $get_page_name = $page->post_title;
+            }else{
+                $select = '';
+            }
+            $option = '<option value="' . get_the_title( $page->ID ) . '"'.$select.'">';
+            $option .= $page->post_title;
+            $option .= '</option>';
+            echo $option;
+        }
+ ?>
+</select>
+<?php }
+
+
 function styles()
 {
     echo '<style>
@@ -192,6 +216,58 @@ function styles()
         left: 10px;
 
     }
+
+
+    .container {
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        font-size: 22px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    .container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        background-color: #eee;
+    }
+    .container:hover input ~ .checkmark {
+        background-color: #ccc;
+    }
+    .container input:checked ~ .checkmark {
+        background-color: #2196F3;
+    }
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+    .container input:checked ~ .checkmark:after {
+        display: block;
+    }
+    .container .checkmark:after {
+        left: 9px;
+        top: 5px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+    }
     </style>';
 }
 add_action('wp_head', 'styles');
@@ -199,6 +275,22 @@ add_action('wp_head', 'styles');
 
 
 function my_custom_menu_page(){
+
+   $pages = get_pages();
+    foreach ( $pages as $page ) {
+        if(get_the_title($page->ID) == get_option('options')){
+            $get_page_name = "/".$page->post_name."/";
+        }else{
+            $get_page_name = get_site_url();
+        }
+
+        if(get_the_title($page->ID) == get_option('gdpr_policy')){
+            $policy_page = "/".$page->post_name."/";
+        }else{
+            $policy_page = get_site_url();
+        }
+    }
+
     $test = "spam['for=name']";
     echo '<script>
     jQuery(document).ready(function(){
@@ -209,7 +301,10 @@ function my_custom_menu_page(){
        var password =  jQuery("label[for=password]").length;
        var re_email =  jQuery("label[for=re-email]").length;
        var phone =  jQuery("label[for=phone]").length;
-       var agree = jQuery("#agree").length;
+       var agree =  jQuery("#agree").length;
+       if(agree){
+            jQuery("#agree").append("<div><spam>If you consent to us using your personal data for that purpose please tick to confirm</spam><div><label class=\'container\'>I Agree<input type=\'checkbox\' checked=\'checked\'><span class=\'checkmark\'></span></label></div><p>For more information please visit our <a href=\''.$get_page_name.'\'>terms & conditions</a> and <a href=\''.$policy_page.'\'>privacy policy</a></p></div>");
+        }
 
        if(name){
            jQuery("label[for=name]").append("<span class=\'tooltipLink closed\'><span class=\'balloon\'>'.get_option('name').'</span></span>");

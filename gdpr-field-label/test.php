@@ -1,5 +1,5 @@
 <div class="wrap">
-<h1>Your Plugin Page Title</h1>
+<h1>GDPR field balloons</h1>
 <div id="welcome-panel" class="welcome-panel">
 
 <div class="welcome-panel-column">
