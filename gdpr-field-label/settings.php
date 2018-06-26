@@ -352,29 +352,3 @@ function my_custom_menu_page(){
     </script>';
 }
 add_action('wp_head', 'my_custom_menu_page');
-
-function my_plugin_create_db() {
-
-	global $wpdb;
-	$charset_collate = $wpdb->get_charset_collate();
-	$table_name = $wpdb->prefix . 'gdpr_field_label';
-
-    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-        $sql = "CREATE TABLE $table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-            colors VARCHAR(50) NOT NULL,
-            names VARCHAR(250) NOT NULL,
-            emails VARCHAR(250) NOT NULL,
-            re_emails VARCHAR(250) NOT NULL,
-            subjects VARCHAR(250) NOT NULL,
-            messages VARCHAR(250) NOT NULL,
-            phones VARCHAR(250) NOT NULL,
-            UNIQUE KEY id (id)
-        ) $charset_collate;";
-
-    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-    dbDelta( $sql );
-    }
-}
-my_plugin_create_db();
